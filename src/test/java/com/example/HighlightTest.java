@@ -88,8 +88,9 @@ public class HighlightTest extends HighlightSolrJettyTestBase {
         System.out.println("DOC2 optSentenceAvgTime: " + optSentenceAvgTime);
         System.out.println("DOC2 wordAvgTime: " + wordAvgTime);
 
-        // Strange is that with this document it works well
+        // SENTENCE is less than 6 times slower
         assertThat(sentenceAvgTime, lessThan(6 * wordAvgTime));
+        // optimized SENTENCE is similar to WORD
         assertThat(optSentenceAvgTime, lessThan(2 * wordAvgTime));
     }
 
@@ -112,7 +113,9 @@ public class HighlightTest extends HighlightSolrJettyTestBase {
         System.out.println(optSentenceAvgTime);
         System.out.println(wordAvgTime);
 
+        // SENTENCE is more than 10 times slower
         assertThat(sentenceAvgTime, greaterThan(10 * wordAvgTime));
+        // optimized SENTENCE is similar to WORD
         assertThat(optSentenceAvgTime, lessThan(2 * wordAvgTime));
     }
 
