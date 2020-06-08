@@ -60,10 +60,12 @@ public class HighlightTest extends HighlightSolrJettyTestBase {
     public void unifiedHighlighter() throws Exception {
         // On my machine search with WORD highlighter takes less than 10 ms
         // search with SENTENCE highliter is about 30 ms so it's 3 - 5 times slower
+        // search with optimized SENTENCE highliter is similar than WORD
         testDoc2();
         // Lets do the same with doc3
         // search with WORD highliter takes similar to doc3, about 10 ms
         // search with SENTENCE highliter takes about 220 ms which is more than 10 times slower than WORD
+        // search with optimized SENTENCE highliter is similar than WORD
         testDoc3();
     }
 
@@ -72,7 +74,7 @@ public class HighlightTest extends HighlightSolrJettyTestBase {
                 "q", "english american", "hl.bs.type", "SENTENCE");
 
         SolrQuery optimizedSentenceHighlightQuery = query("qt", "/search",
-                "q", "english american", "hl.bs.type", "SENTENCE", "hl.fragsizeIsMinimum", "false",
+                "q", "english american", "hl.bs.type", "SENTENCE", "hl.fragsizeIsMinimum", "true",
                 "hl.fragAlignRatio", "0");
 
         SolrQuery wordHighlightQuery = query("qt", "/search",
@@ -87,8 +89,8 @@ public class HighlightTest extends HighlightSolrJettyTestBase {
         System.out.println("DOC2 wordAvgTime: " + wordAvgTime);
 
         // Strange is that with this document it works well
-        assertThat(sentenceAvgTime, lessThan(5 * wordAvgTime));
-        assertThat(optSentenceAvgTime, lessThan(5 * wordAvgTime));
+        assertThat(sentenceAvgTime, lessThan(6 * wordAvgTime));
+        assertThat(optSentenceAvgTime, lessThan(2 * wordAvgTime));
     }
 
     private void testDoc3() throws Exception {
@@ -96,7 +98,7 @@ public class HighlightTest extends HighlightSolrJettyTestBase {
                 "q", "slovenskej republiky", "hl.bs.type", "SENTENCE");
 
         SolrQuery optimizedSentenceHighlightQuery = query("qt", "/search",
-                "q", "slovenskej republiky", "hl.bs.type", "SENTENCE", "hl.fragsizeIsMinimum", "false",
+                "q", "slovenskej republiky", "hl.bs.type", "SENTENCE", "hl.fragsizeIsMinimum", "true",
                 "hl.fragAlignRatio", "0");
 
         SolrQuery wordHighlightQuery = query("qt", "/search",
@@ -111,7 +113,7 @@ public class HighlightTest extends HighlightSolrJettyTestBase {
         System.out.println(wordAvgTime);
 
         assertThat(sentenceAvgTime, greaterThan(10 * wordAvgTime));
-        assertThat(optSentenceAvgTime, greaterThan(10 * wordAvgTime));
+        assertThat(optSentenceAvgTime, lessThan(2 * wordAvgTime));
     }
 
     private int getAverateTime(SolrQuery query, Matcher<Long> matcher, int count) throws Exception {
@@ -120,6 +122,6 @@ public class HighlightTest extends HighlightSolrJettyTestBase {
             QueryResponse resp = assertRespCount(query, matcher);
             time += (int) resp.getResponseHeader().get("QTime");
         }
-        return time / 10;
+        return time / count;
     }
 }
